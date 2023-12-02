@@ -1,8 +1,6 @@
 package com.scalable.payment.model;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -19,21 +17,18 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     private String username;
-    private String product;
-    private Integer amount;
-    private Double price;
+    private Double balance;
 
     public Payment() { }
 
-    public Payment(String username, String product, Integer amount, Double price) {
+    public Payment(String username, Double balance) {
         this.username = username;
-        this.product = product;
-        this.amount = amount;
-        this.price = price;
+        this.balance = balance;
     }
 
-    public Payment(String username, String product) {
+    // Let's say that starting balance is 100 unit currency
+    public Payment(String username) {
         this.username = username;
-        this.product = product;
+        this.balance = 100.00;
     }
 }
