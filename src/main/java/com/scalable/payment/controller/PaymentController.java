@@ -6,13 +6,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("payment")
+@RequestMapping("/payment")
 public class PaymentController {
     @Autowired
     PaymentService paymentService;
 
     @PostMapping("/create-default")
-    public ResponseEntity<String> createNewPayment(@RequestParam String username)
+    public ResponseEntity<String> createNewDefaultPayment(@RequestParam String username)
     {
         paymentService.createDefaultPayment(username);
         return ResponseEntity.ok().build();
