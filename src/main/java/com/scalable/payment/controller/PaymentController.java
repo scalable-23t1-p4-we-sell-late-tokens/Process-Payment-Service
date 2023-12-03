@@ -5,28 +5,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
 @RestController
-@RequestMapping("/payment")
+@RequestMapping("payment")
 public class PaymentController {
     @Autowired
     PaymentService paymentService;
 
-    @PostMapping("/create-default")
-    public ResponseEntity<String> createNewDefaultPayment(@RequestParam String username)
+    @PostMapping("/create-default/{username}")
+    public ResponseEntity<String> createNewDefaultPayment(@PathVariable String username)
     {
         paymentService.createDefaultPayment(username);
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<String> createNewPayment(@RequestParam String username, @RequestParam Double credits)
+    @PostMapping("/create/{username}/{credits}")
+    public ResponseEntity<String> createNewPayment(@PathVariable String username, @PathVariable Double credits)
     {
         paymentService.createNewPayment(username, credits);
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/balance")
-    public ResponseEntity<Double> getBalance(@RequestParam String username) {
+    @GetMapping("/balance/{username}")
+    public ResponseEntity<Double> getBalance(@PathVariable String username) {
         Payment retrievedUsername = paymentService.getUser(username).orElse(null);
         if (retrievedUsername != null) {
             return ResponseEntity.ok(retrievedUsername.getBalance());

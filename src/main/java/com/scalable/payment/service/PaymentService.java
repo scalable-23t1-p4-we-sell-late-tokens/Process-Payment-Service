@@ -14,14 +14,19 @@ public class PaymentService {
     private PaymentRepository createPaymentRepository;
 
     public void createDefaultPayment(String username) {
-        Payment newOrder = new Payment(username);
-        createPaymentRepository.save(newOrder);
+        Optional<Payment> entity = createPaymentRepository.findByUsername(username);
+        if(!entity.isPresent()) {
+            Payment newPayment = new Payment(username);
+            createPaymentRepository.save(newPayment);
+        }
     }
 
     public void createNewPayment(String username, Double credits) {
-        Payment newOrder = new Payment(username, credits);
-
-        createPaymentRepository.save(newOrder);
+        Optional<Payment> entity = createPaymentRepository.findByUsername(username);
+        if(!entity.isPresent()) {
+            Payment newPayment = new Payment(username, credits);
+            createPaymentRepository.save(newPayment);
+        }
     }
 
     public Optional<Payment> getUser(String username) {
