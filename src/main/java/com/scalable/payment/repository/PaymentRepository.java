@@ -9,6 +9,6 @@ import com.scalable.payment.model.Payment;
 import java.util.Optional;
 
 @Repository
-public interface PaymentRepository extends CrudRepository<Payment, String> {
+public interface PaymentRepository extends CrudRepository<Payment, Long> {
     Optional<Payment> findByUsername(String username);
 }
