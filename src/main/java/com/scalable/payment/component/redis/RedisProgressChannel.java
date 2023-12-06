@@ -15,7 +15,8 @@ import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Component;
 
 // TODO: Figure out and implement the timeout mechanism
-
+// Add a way to add a custom message to message_response
+// Fix exception not holding a value
 class RuntimeExceptionRollbacker<T extends RuntimeExceptionWithPayload> {
 
     T exception;
@@ -97,7 +98,7 @@ public class RedisProgressChannel implements MessageListener {
             long amount = json.getAmount();
             String messageFlag = json.getMessage_flag();
 
-            paymentService.orderItem(username, itemName, amount);
+            paymentService.orderItem(json);
             messageProcessed = true;
 
             JSONBuilder response = new JSONBuilder();
@@ -118,16 +119,24 @@ public class RedisProgressChannel implements MessageListener {
             System.err.println("The message was flagged for rollback demonstration, you can chill out (unless unintented): "
                     + forceRollbackException.getMessage());
             System.out.println("Beginning rollback process");
+            forceRollbackException.setMessage_response("FORCED");
             RuntimeExceptionRollbacker<ForceRollbackException> rollbacker =
                     new RuntimeExceptionRollbacker<>(forceRollbackException, paymentService);
             rollbacker.rollback();
 
         } catch (InsufficientFundException insufficientFundException) {
             System.err.println("You don't got the cash: " + insufficientFundException.getMessage());
-            System.out.println("Beginning rollback process");
-            RuntimeExceptionRollbacker<InsufficientFundException> rollbacker =
-                    new RuntimeExceptionRollbacker<>(insufficientFundException, paymentService);
-            rollbacker.rollback();
+            JSONBuilder response = new JSONBuilder();
+            response.addField("username", insufficientFundException.getUsername())
+                .addField("order_id", insufficientFundException.getOrder_id())
+                .addField("message_response", "INSUFFICIENT_FUND");
+            try {
+                paymentService.sendRollbackSignal(response.buildAsString());
+                System.out.println("Rollback message sent");
+            }
+            catch (UnknownException unknownException) {
+                System.err.println("Failed to rollback " + unknownException.getMessage());
+        }
 
         } catch (ItemNotFoundException itemNotFoundException) {
             System.err.println("Item doesn't exist: " + itemNotFoundException.getMessage());
@@ -137,6 +146,7 @@ public class RedisProgressChannel implements MessageListener {
             System.err.println("The service has reached timeout period: " + timeOutException.getMessage());
             if (messageProcessed) {
                 System.out.println("Beginning rollback process");
+                timeOutException.setMessage_response("TIMEOUT");
                 RuntimeExceptionRollbacker<TimeOutException> rollbacker =
                         new RuntimeExceptionRollbacker<>(timeOutException, paymentService);
                 rollbacker.rollback();
@@ -146,6 +156,7 @@ public class RedisProgressChannel implements MessageListener {
             System.err.println("Exception occurred, read the error message: " + unknownException.getMessage());
             if (messageProcessed) {
                 System.out.println("Beginning rollback process");
+                unknownException.setMessage_response("UNKNOWN");
                 ExceptionRollbacker<UnknownException> rollbacker =
                         new ExceptionRollbacker<>(unknownException, paymentService);
                 rollbacker.rollback();

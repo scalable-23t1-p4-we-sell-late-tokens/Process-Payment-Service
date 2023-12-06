@@ -9,6 +9,9 @@ import com.scalable.payment.model.Price;
 import com.scalable.payment.repository.PaymentRepository;
 import com.scalable.payment.repository.PriceRepository;
 import com.scalable.payment.service.redis.RedisService;
+import com.scalable.payment.type.json.ProgressJSON;
+
+import org.postgresql.translation.messages_es;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -50,6 +53,16 @@ public class PaymentService {
         }
     }
 
+
+    public void updateItemPrice(String itemName, Double price) {
+        Optional<Price> entity = priceRepository.findByItemName(itemName);
+        if(entity.isPresent()) {
+            Price newPriceForItem = entity.get();
+            newPriceForItem.setPrice(price);
+            priceRepository.save(newPriceForItem);
+        }
+    }
+
     public Double checkPriceOfItem(String itemName) {
         Optional<Price> entity = priceRepository.findByItemName(itemName);
         return entity.map(Price::getPrice).orElse(null);
@@ -59,8 +72,11 @@ public class PaymentService {
         return createPaymentRepository.findByUsername(username);
     }
 
-    public void orderItem(String username, String itemName, long amount) throws ItemNotFoundException,
+    public void orderItem(ProgressJSON message) throws ItemNotFoundException,
             InsufficientFundException, UserNotFoundException {
+        String username = message.getUsername();
+        String itemName = message.getItem_name();
+        long amount = message.getAmount();
         Payment user = createPaymentRepository.findByUsername(username).orElse(null);
         Price price = priceRepository.findByItemName(itemName).orElse(null);
         if (user == null) {
@@ -71,8 +87,9 @@ public class PaymentService {
         }
         else {
             if (user.getBalance() < (price.getPrice() * amount)) {
-                throw new InsufficientFundException("More gold is required: (" +
-                        ((price.getPrice() * amount) - user.getBalance()) + " more is required)");
+                String exceptionMessage = "More gold is required: (" +
+                        ((price.getPrice() * amount) - user.getBalance()) + " more is required)";
+                throw new InsufficientFundException(message, exceptionMessage);
             }
             user.setBalance(user.getBalance() - (price.getPrice() * amount));
             createPaymentRepository.save(user);

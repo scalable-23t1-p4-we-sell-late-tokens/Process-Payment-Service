@@ -1,6 +1,5 @@
 package com.scalable.payment.repository;
 
-import com.scalable.payment.model.Payment;
 import com.scalable.payment.model.Price;
 import org.springframework.data.repository.CrudRepository;
 

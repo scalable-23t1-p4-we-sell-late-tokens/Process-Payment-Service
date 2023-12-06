@@ -1,5 +1,6 @@
 package com.scalable.payment.exception;
 
+import com.scalable.payment.type.json.ProgressJSON;
 import com.scalable.payment.type.json.RollbackJSON;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,6 +19,33 @@ public class ExceptionWithPayload extends Exception{
 
     public ExceptionWithPayload(RollbackJSON parameters) {
         super();
+        this.username = parameters.getUsername();
+        this.order_id = parameters.getOrder_id();
+        this.item_name = parameters.getItem_name();
+        this.amount = parameters.getAmount();
+        this.message_response = parameters.getMessage_response();
+    }
+
+    public ExceptionWithPayload(ProgressJSON parameters) {
+        super();
+        this.username = parameters.getUsername();
+        this.order_id = parameters.getOrder_id();
+        this.item_name = parameters.getItem_name();
+        this.amount = parameters.getAmount();
+        this.message_response = null;
+    }
+
+    public ExceptionWithPayload(ProgressJSON parameters, String message) {
+        super(message);
+        this.username = parameters.getUsername();
+        this.order_id = parameters.getOrder_id();
+        this.item_name = parameters.getItem_name();
+        this.amount = parameters.getAmount();
+        this.message_response = null;
+    }
+
+    public ExceptionWithPayload(RollbackJSON parameters, String message) {
+        super(message);
         this.username = parameters.getUsername();
         this.order_id = parameters.getOrder_id();
         this.item_name = parameters.getItem_name();

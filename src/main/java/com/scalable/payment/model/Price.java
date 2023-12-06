@@ -21,7 +21,7 @@ public class Price {
 
     public Price() { }
 
-    public Price(String itemName, Double balance) {
+    public Price(String itemName, Double price) {
         this.itemName = itemName;
         this.price = price;
     }

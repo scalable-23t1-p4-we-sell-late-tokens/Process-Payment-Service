@@ -53,6 +53,13 @@ public class PaymentController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/update-price/{itemName}/{price}")
+    public ResponseEntity<String> updatePriceForItem(@PathVariable String itemName, @PathVariable Double price)
+    {
+        paymentService.updateItemPrice(itemName, price);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/check/{itemName}")
     public ResponseEntity<String> checkPriceOfItem(@PathVariable String itemName)
     {
