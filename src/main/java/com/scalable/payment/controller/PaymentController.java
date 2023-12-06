@@ -46,6 +46,27 @@ public class PaymentController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/create-price/{itemName}/{price}")
+    public ResponseEntity<String> createNewPriceForItem(@PathVariable String itemName, @PathVariable Double price)
+    {
+        paymentService.createNewItemPrice(itemName, price);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/check/{itemName}")
+    public ResponseEntity<String> checkPriceOfItem(@PathVariable String itemName)
+    {
+        Double price = paymentService.checkPriceOfItem(itemName);
+        if (price != null) {
+            String response = "{\"item_name\": \"" + itemName + "\", \n"
+                    + "\"price\": " + price + "\n}";
+            return ResponseEntity.ok(response);
+        }
+        else {
+            return ResponseEntity.ok("Error, item not found");
+        }
+
+    }
     @GetMapping("/balance/{username}")
     public ResponseEntity<Double> getBalance(@PathVariable String username) {
         Payment retrievedUsername = paymentService.getUser(username).orElse(null);
