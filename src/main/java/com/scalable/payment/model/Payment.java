@@ -14,8 +14,8 @@ import lombok.Setter;
 @Table(name = "payments")
 public class Payment {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    private long id;
     private String username;
     private Double balance;
 
@@ -29,6 +29,6 @@ public class Payment {
     // Let's say that starting balance is 100 unit currency
     public Payment(String username) {
         this.username = username;
-        this.balance = 100.0;
+        this.balance = 30.0;
     }
 }
