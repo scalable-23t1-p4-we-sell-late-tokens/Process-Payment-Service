@@ -94,23 +94,32 @@ public class RedisProgressChannel implements MessageListener {
 
             String username = json.getUsername();
             String orderID = json.getOrder_id();
+            Double price = json.getPrice();
             String itemName = json.getItem_name();
             long amount = json.getAmount();
             String messageFlag = json.getMessage_flag();
 
+            paymentService.createNewItemPrice(itemName, price);
+            paymentService.createDefaultPayment(username);
             paymentService.orderItem(json);
             messageProcessed = true;
+
+            if(messageFlag.equals("payment")) {
+                JSONBuilder response = new JSONBuilder();
+                response.addField("username", username)
+                        .addField("order_id", orderID)
+                        .addField("item_name", itemName)
+                        .addField("amount", amount)
+                        .addField("message_response", null);
+                throw new ForceRollbackException(response.buildAsClass(RollbackJSON.class));
+            }
 
             JSONBuilder response = new JSONBuilder();
             response.addField("username", username)
                     .addField("order_id", orderID)
                     .addField("item_name", itemName)
                     .addField("amount", amount)
-                    .addField("message_response", messageFlag);
-
-            if(messageFlag.equals("payment")) {
-                throw new ForceRollbackException(response.buildAsClass(RollbackJSON.class));
-            }
+                    .addField("message_flag", messageFlag);
 
             paymentService.sendProgressSignal(response.buildAsString());
             messageProcessed = false;

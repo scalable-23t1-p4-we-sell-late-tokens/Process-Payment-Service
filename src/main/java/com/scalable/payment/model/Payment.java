@@ -29,6 +29,6 @@ public class Payment {
     // Let's say that starting balance is 100 unit currency
     public Payment(String username) {
         this.username = username;
-        this.balance = 100.0;
+        this.balance = 30.0;
     }
 }

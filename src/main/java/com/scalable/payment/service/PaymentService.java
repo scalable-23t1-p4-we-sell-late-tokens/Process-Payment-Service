@@ -1,5 +1,6 @@
 package com.scalable.payment.service;
 
+import com.scalable.payment.controller.PaymentController;
 import com.scalable.payment.exception.custom.InsufficientFundException;
 import com.scalable.payment.exception.custom.ItemNotFoundException;
 import com.scalable.payment.exception.custom.UnknownException;
@@ -16,6 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import io.micrometer.core.instrument.MeterRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 @Service
@@ -28,6 +32,11 @@ public class PaymentService {
 
     @Autowired
     private RedisService redisService;
+
+    @Autowired
+    private MeterRegistry registry;
+
+    private final Logger LOG = LoggerFactory.getLogger(PaymentService.class);
 
     public void createDefaultPayment(String username) {
         Optional<Payment> entity = createPaymentRepository.findByUsername(username);
@@ -89,9 +98,13 @@ public class PaymentService {
             if (user.getBalance() < (price.getPrice() * amount)) {
                 String exceptionMessage = "More gold is required: (" +
                         ((price.getPrice() * amount) - user.getBalance()) + " more is required)";
+                LOG.error(username + " has insufficient funds");
+                registry.counter("error.payment.total").increment();
                 throw new InsufficientFundException(message, exceptionMessage);
             }
             user.setBalance(user.getBalance() - (price.getPrice() * amount));
+            registry.counter("payment.total").increment();
+            LOG.info(username + " paid " + (price.getPrice() * amount));
             createPaymentRepository.save(user);
         }
     }

@@ -10,5 +10,6 @@ import lombok.*;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @ToString(includeFieldNames = true)
 public class ProgressJSON extends BaseJSON {
+    private Double price;
     private String message_flag;
 }
