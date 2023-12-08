@@ -1,6 +1,5 @@
 package com.scalable.payment.service;
 
-import com.scalable.payment.controller.PaymentController;
 import com.scalable.payment.exception.custom.InsufficientFundException;
 import com.scalable.payment.exception.custom.ItemNotFoundException;
 import com.scalable.payment.exception.custom.UnknownException;
@@ -12,12 +11,12 @@ import com.scalable.payment.repository.PriceRepository;
 import com.scalable.payment.service.redis.RedisService;
 import com.scalable.payment.type.json.ProgressJSON;
 
-import org.postgresql.translation.messages_es;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import io.micrometer.core.instrument.MeterRegistry;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

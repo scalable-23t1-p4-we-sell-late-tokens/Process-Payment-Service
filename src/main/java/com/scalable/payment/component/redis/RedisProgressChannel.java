@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Component;
+import io.opentelemetry.api.trace.*;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 
 // TODO: Figure out and implement the timeout mechanism
 // Add a way to add a custom message to message_response
@@ -82,7 +84,11 @@ public class RedisProgressChannel implements MessageListener {
         this.objectMapper = objectMapper;
     }
 
+    @Autowired
+    private Tracer tracer;
+
     @Override
+    @WithSpan
     public void onMessage(Message message, byte[] pattern) {
         boolean messageProcessed = false;
         String payload = new String(message.getBody());
@@ -121,7 +127,13 @@ public class RedisProgressChannel implements MessageListener {
                     .addField("amount", amount)
                     .addField("message_flag", messageFlag);
 
-            paymentService.sendProgressSignal(response.buildAsString());
+            Span span = tracer.spanBuilder("Publish Message").startSpan();
+            try {
+                paymentService.sendProgressSignal(response.buildAsString());
+                span.addEvent("Message published to inventory-service");
+            } finally {
+                span.end();
+            }
             messageProcessed = false;
 
         } catch (ForceRollbackException forceRollbackException) {
